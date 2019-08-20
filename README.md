@@ -217,7 +217,7 @@ const LAST_MODIFIED_TIME = 'Tue, 20 Aug 2019 06:32:48 GMT'
 const ETAG_NAME = " W/\'2a3b-1602480f459\'"
 
 http.createServer((req, res) => {
-    if(req.url === '/'){
+    if (req.url === '/') {
         const html = fs.readFileSync('./index.html', 'utf8')
         res.writeHead(200, {
             'Content-Type': 'text/html'
@@ -225,13 +225,13 @@ http.createServer((req, res) => {
         res.end(html)
     }
 
-    if(req.url === '/test.js'){
+    if (req.url === '/test.js') {
         // 获取 if-none-match 和 if-modified-since
         const IF_MODIFIED_SINCE = req.headers["if-modified-since"];
         const IF_NONE_MATCH = req.headers["if-none-match"];
 
         // 判断头信息是否一致
-        if(IF_MODIFIED_SINCE === LAST_MODIFIED_TIME || IF_NONE_MATCH === ETAG_NAME){
+        if (IF_MODIFIED_SINCE === LAST_MODIFIED_TIME || IF_NONE_MATCH === ETAG_NAME) {
             res.writeHead(304, {
                 'Content-Type': 'text/html',
                 'Cache-Control': 'max-age=36000, no-cache',
@@ -239,7 +239,7 @@ http.createServer((req, res) => {
                 'Etag': ETAG_NAME
             })
             res.end('')
-        }else {
+        } else {
             res.writeHead(200, {
                 'Content-Type': 'text/html',
                 'Cache-Control': 'max-age=36000, no-cache',
@@ -254,3 +254,9 @@ http.createServer((req, res) => {
 
 ## 测试结果
 ![last-modified-etag](./images/last-modified-etag.png)
+
+## 总结
+![last-modified-etag](./images/last-modified-etag-chart.png)
+
+当我们的资源内容不可复用时，直接为 Cache-Control 设置 no-store，拒绝一切形式的缓存；否则考虑是否每次都需要向服务器进行缓存有效确认，如果需要，那么设 Cache-Control 的值为 no-cache；否则考虑该资源是否可以被代理服务器缓存，根据其结果决定是设置为 private 还是 public；然后考虑该资源的过期时间，设置对应的 max-age 和 s-maxage 值；最后，配置协商缓存需要用到的 Etag、Last-Modified 等参数。
+
